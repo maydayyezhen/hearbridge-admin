@@ -19,3 +19,19 @@ export interface SignCategoryItem {
   /** 分类封面完整访问地址。 */
   coverUrl: string;
 }
+
+/**
+ * 手势分类保存参数。
+ *
+ * 当前阶段新增和编辑可以共用这一套字段。
+ */
+export interface SignCategorySaveParams {
+  /** 分类编码。 */
+  code: string;
+
+  /** 分类中文名称。 */
+  nameZh: string;
+
+  /** 分类封面在 MinIO 中的对象 Key。 */
+  coverObjectKey?: string;
+}

@@ -5,10 +5,15 @@
         <div class="flex items-center justify-between">
           <div>
             <div class="text-base font-bold">手势分类管理</div>
-            <div class="mt-1 text-sm text-gray-500">第一阶段只读展示后端已有手势分类数据。</div>
+            <div class="mt-1 text-sm text-gray-500">
+              第二阶段：支持手势分类新增、编辑、删除。当前图片先通过 MinIO 对象 Key 维护。
+            </div>
           </div>
 
-          <el-button type="primary" :loading="loading" @click="loadCategoryList">刷新</el-button>
+          <div class="flex gap-2">
+            <el-button :loading="loading" @click="loadCategoryList">刷新</el-button>
+            <el-button type="primary" @click="openCreateDialog">新增分类</el-button>
+          </div>
         </div>
       </template>
 
@@ -39,20 +44,107 @@
           min-width="260"
           show-overflow-tooltip
         />
+
+        <el-table-column label="操作" width="180" fixed="right" align="center">
+          <template #default="{ row }">
+            <el-button type="primary" link @click="openEditDialog(row)">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'create' ? '新增手势分类' : '编辑手势分类'"
+      width="520px"
+      destroy-on-close
+    >
+      <el-form ref="formRef" :model="formModel" :rules="formRules" label-width="110px">
+        <el-form-item label="分类编码" prop="code">
+          <el-input v-model="formModel.code" placeholder="例如：daily_greeting" clearable />
+        </el-form-item>
+
+        <el-form-item label="中文名称" prop="nameZh">
+          <el-input v-model="formModel.nameZh" placeholder="例如：日常问候" clearable />
+        </el-form-item>
+
+        <el-form-item label="封面对象 Key" prop="coverObjectKey">
+          <el-input
+            v-model="formModel.coverObjectKey"
+            placeholder="例如：sign/category/daily_greeting.png"
+            clearable
+          />
+          <div class="mt-1 text-xs text-gray-400">
+            当前阶段先手动填写 MinIO 对象 Key；下一步再接入统一上传组件。
+          </div>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
 import SignCategoryAPI from "@/api/hearbridge/sign-category";
-import type { SignCategoryItem } from "../../../types/api/hearbridge/sign-category";
+import type {
+  SignCategoryItem,
+  SignCategorySaveParams,
+} from "@/types/api/hearbridge/sign-category";
+
+/** 分类弹窗模式。 */
+type DialogMode = "create" | "edit";
 
 /** 页面加载状态。 */
 const loading = ref(false);
 
+/** 表单提交状态。 */
+const submitLoading = ref(false);
+
+/** 弹窗是否显示。 */
+const dialogVisible = ref(false);
+
+/** 当前弹窗模式。 */
+const dialogMode = ref<DialogMode>("create");
+
+/** 当前编辑的分类 ID。 */
+const editingId = ref<number | null>(null);
+
+/** 表单实例。 */
+const formRef = ref<FormInstance>();
+
 /** 手势分类列表。 */
 const categoryList = ref<SignCategoryItem[]>([]);
+
+/** 表单数据。 */
+const formModel = reactive<SignCategorySaveParams>({
+  /** 分类编码。 */
+  code: "",
+
+  /** 分类中文名称。 */
+  nameZh: "",
+
+  /** 分类封面对象 Key。 */
+  coverObjectKey: "",
+});
+
+/** 表单校验规则。 */
+const formRules = reactive<FormRules<SignCategorySaveParams>>({
+  code: [
+    { required: true, message: "请输入分类编码", trigger: "blur" },
+    {
+      pattern: /^[a-zA-Z0-9_-]+$/,
+      message: "分类编码只能包含字母、数字、下划线和短横线",
+      trigger: "blur",
+    },
+  ],
+  nameZh: [{ required: true, message: "请输入中文名称", trigger: "blur" }],
+});
 
 /** 加载手势分类列表。 */
 async function loadCategoryList(): Promise<void> {
@@ -64,6 +156,91 @@ async function loadCategoryList(): Promise<void> {
     console.error("加载手势分类列表失败：", error);
   } finally {
     loading.value = false;
+  }
+}
+
+/** 重置表单。 */
+function resetForm(): void {
+  formModel.code = "";
+  formModel.nameZh = "";
+  formModel.coverObjectKey = "";
+  editingId.value = null;
+  formRef.value?.clearValidate();
+}
+
+/** 打开新增弹窗。 */
+function openCreateDialog(): void {
+  dialogMode.value = "create";
+  dialogVisible.value = true;
+  resetForm();
+}
+
+/** 打开编辑弹窗。 */
+function openEditDialog(row: SignCategoryItem): void {
+  dialogMode.value = "edit";
+  dialogVisible.value = true;
+  editingId.value = row.id;
+
+  formModel.code = row.code;
+  formModel.nameZh = row.nameZh;
+  formModel.coverObjectKey = row.coverObjectKey || "";
+}
+
+/** 提交表单。 */
+async function handleSubmit(): Promise<void> {
+  if (!formRef.value) {
+    return;
+  }
+
+  await formRef.value.validate();
+
+  submitLoading.value = true;
+
+  try {
+    const payload: SignCategorySaveParams = {
+      code: formModel.code.trim(),
+      nameZh: formModel.nameZh.trim(),
+      coverObjectKey: formModel.coverObjectKey?.trim() || "",
+    };
+
+    if (dialogMode.value === "create") {
+      await SignCategoryAPI.create(payload);
+      ElMessage.success("新增分类成功");
+    } else {
+      if (editingId.value == null) {
+        ElMessage.error("缺少分类 ID，无法更新");
+        return;
+      }
+
+      await SignCategoryAPI.update(editingId.value, payload);
+      ElMessage.success("更新分类成功");
+    }
+
+    dialogVisible.value = false;
+    await loadCategoryList();
+  } catch (error) {
+    console.error("保存手势分类失败：", error);
+  } finally {
+    submitLoading.value = false;
+  }
+}
+
+/** 删除分类。 */
+async function handleDelete(row: SignCategoryItem): Promise<void> {
+  try {
+    await ElMessageBox.confirm(`确定删除分类「${row.nameZh}（${row.code}）」吗？`, "删除确认", {
+      type: "warning",
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+    });
+
+    await SignCategoryAPI.delete(row.id);
+    ElMessage.success("删除分类成功");
+    await loadCategoryList();
+  } catch (error) {
+    if (error !== "cancel") {
+      console.error("删除手势分类失败：", error);
+    }
   }
 }
 
