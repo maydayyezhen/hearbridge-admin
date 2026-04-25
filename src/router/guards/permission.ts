@@ -19,6 +19,24 @@ export function setupPermissionGuard() {
     NProgress.start();
 
     try {
+      const devNoAuth = import.meta.env.VITE_HEARBRIDGE_DEV_NO_AUTH === "true";
+
+      // HearBridge 第一阶段开发模式：临时绕开登录和动态菜单接口
+      if (devNoAuth) {
+        const permissionStore = usePermissionStore();
+
+        if (!permissionStore.isRouteGenerated) {
+          permissionStore.useConstantRoutesForDev();
+        }
+
+        if (to.matched.length === 0) {
+          next("/404");
+        } else {
+          next();
+        }
+        return;
+      }
+
       const isLoggedIn = useUserStore().isLoggedIn();
 
       // 未登录处理

@@ -72,6 +72,39 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+
+  {
+    path: "/hearbridge",
+    name: "HearBridge",
+    component: Layout,
+    redirect: "/hearbridge/categories",
+    meta: {
+      title: "听桥管理",
+      icon: "menu",
+    },
+    children: [
+      {
+        path: "categories",
+        name: "HearBridgeSignCategory",
+        component: () => import("@/views/hearbridge/category/index.vue"),
+        meta: {
+          title: "手势分类管理",
+          icon: "dict",
+          keepAlive: true,
+        },
+      },
+      {
+        path: "resources",
+        name: "HearBridgeSignResource",
+        component: () => import("@/views/hearbridge/resource/index.vue"),
+        meta: {
+          title: "手势资源管理",
+          icon: "document",
+          keepAlive: true,
+        },
+      },
+    ],
+  },
 ];
 
 /**

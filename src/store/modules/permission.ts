@@ -68,6 +68,19 @@ export const usePermissionStore = defineStore("permission", () => {
     isRouteGenerated.value = false;
   };
 
+  /**
+   * 使用静态路由作为开发阶段菜单。
+   *
+   * 说明：
+   * 第一阶段 HearBridge 管理端暂时不接模板动态菜单接口，
+   * 因此这里直接把 constantRoutes 放入菜单路由中。
+   */
+  function useConstantRoutesForDev(): void {
+    routes.value = [...constantRoutes];
+    mixLayoutSideMenus.value = [];
+    isRouteGenerated.value = true;
+  }
+
   let reloadPromise: Promise<RouteRecordRaw[]> | null = null;
 
   /**
@@ -129,6 +142,7 @@ export const usePermissionStore = defineStore("permission", () => {
     generateRoutes,
     setMixLayoutSideMenus,
     resetRouter,
+    useConstantRoutesForDev,
     reloadDynamicRoutesOnce,
     reloadPermissionSnapshotOnce,
   };

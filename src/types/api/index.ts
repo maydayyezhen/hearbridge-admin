@@ -17,6 +17,7 @@ export * from "./statistics";
 export * from "./notice";
 export * from "./tenant";
 export * from "./tenant-plan";
+export * from "./hearbridge";
 
 // 其他模块
 export * from "./file";
