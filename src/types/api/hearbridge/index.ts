@@ -10,4 +10,6 @@ export type {
   SignSampleQualityUpdateParams,
   SignSampleSummary,
   SignSampleSyncResult,
+  ModelTrainResult,
 } from "./sign-sample";
+export type { ModelVersionStatus, SignModelVersionItem } from "./model-version";

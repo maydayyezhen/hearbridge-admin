@@ -113,6 +113,26 @@ export const constantRoutes: RouteRecordRaw[] = [
           keepAlive: true,
         },
       },
+      {
+        path: "training",
+        name: "HearBridgeTraining",
+        component: () => import("@/views/hearbridge/training/index.vue"),
+        meta: {
+          title: "训练管理",
+          icon: "monitor",
+          keepAlive: true,
+        },
+      },
+      {
+        path: "model-versions",
+        name: "HearBridgeModelVersion",
+        component: () => import("@/views/hearbridge/model-version/index.vue"),
+        meta: {
+          title: "模型版本管理",
+          icon: "monitor",
+          keepAlive: true,
+        },
+      },
     ],
   },
 ];

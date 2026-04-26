@@ -7,6 +7,7 @@ import type {
   SignSampleQueryParams,
   SignSampleSummary,
   SignSampleSyncResult,
+  ModelTrainResult,
 } from "@/types/api";
 
 /** 手势样本接口基础路径。 */
@@ -50,6 +51,11 @@ const SignSampleAPI = {
   /** 软删除样本。 */
   delete(id: number) {
     return hearbridgeRequest.delete<any, void>(`${SIGN_SAMPLE_BASE_URL}/${id}`);
+  },
+
+  /** 调用后端执行模型训练。 */
+  trainModel() {
+    return hearbridgeRequest.post<any, ModelTrainResult>(`${SIGN_SAMPLE_BASE_URL}/train`);
   },
 };
 

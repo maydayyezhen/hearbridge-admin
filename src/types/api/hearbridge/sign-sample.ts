@@ -178,3 +178,83 @@ export interface FeatureConvertResult {
   /** 结果说明。 */
   message?: string;
 }
+
+/**
+ * 模型训练结果。
+ */
+export interface ModelTrainResult {
+  /** 训练运行名称。 */
+  runName: string;
+
+  /** 训练数据目录。 */
+  dataRoot: string;
+
+  /** 训练产物目录。 */
+  artifactDir: string;
+
+  /** 模型文件路径。 */
+  modelPath: string;
+
+  /** 标签映射文件路径。 */
+  labelMapPath: string;
+
+  /** 训练曲线图路径。 */
+  trainingCurvePath: string;
+
+  /** 混淆矩阵图路径。 */
+  confusionMatrixPath: string;
+
+  /** 评估结果文本路径。 */
+  evalResultPath: string;
+
+  /** 样本总数。 */
+  sampleCount: number;
+
+  /** 训练集样本数。 */
+  trainSampleCount: number;
+
+  /** 验证集样本数。 */
+  valSampleCount: number;
+
+  /** 类别数量。 */
+  classCount: number;
+
+  /** 输入形状。 */
+  inputShape: number[];
+
+  /** 实际训练轮数。 */
+  epochsRan: number;
+
+  /** 最终训练准确率。 */
+  finalTrainAccuracy: number;
+
+  /** 最终验证准确率。 */
+  finalValAccuracy: number;
+
+  /** 最终训练损失。 */
+  finalTrainLoss: number;
+
+  /** 最终验证损失。 */
+  finalValLoss: number;
+
+  /** 训练耗时，单位秒。 */
+  durationSec: number;
+
+  /** 标签映射。 */
+  labelMap: Record<string, number>;
+
+  /** 结果说明。 */
+  message?: string;
+
+  /** 后端登记后的模型版本 ID。 */
+  versionId?: number;
+
+  /** 后端登记后的模型版本名称。 */
+  versionName?: string;
+
+  /** 后端登记后的模型版本状态。 */
+  versionStatus?: string;
+
+  /** 是否当前发布版本。 */
+  published?: boolean;
+}
