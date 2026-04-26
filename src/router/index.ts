@@ -1,6 +1,7 @@
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
 import { getAdminToken } from "@/utils/hearbridge-admin-auth";
+import { usePermissionStore } from "@/store/modules/permission";
 
 /**
  * 后台基础布局组件。
@@ -30,7 +31,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/",
     name: "/",
     component: Layout,
-    redirect: "/dashboard",
+    redirect: "/hearbridge/categories",
     children: [
       {
         path: "dashboard",
@@ -160,6 +161,12 @@ const whiteList = ["/login"];
  */
 router.beforeEach((to) => {
   const token = getAdminToken();
+  const permissionStore = usePermissionStore();
+
+  // 当前管理端第一版不接模板动态菜单接口，直接用静态路由生成侧边栏菜单。
+  if (!permissionStore.isRouteGenerated) {
+    permissionStore.useConstantRoutesForDev();
+  }
 
   if (token) {
     if (to.path === "/login") {
