@@ -129,3 +129,52 @@ export interface SignSampleQualityUpdateParams {
   /** 质量说明。 */
   qualityMessage?: string;
 }
+
+/**
+ * 手势样本同步结果。
+ */
+export interface SignSampleSyncResult {
+  /** Python 扫描到的样本数量。 */
+  scannedCount: number;
+
+  /** 新增数量。 */
+  insertedCount: number;
+
+  /** 更新数量。 */
+  updatedCount: number;
+
+  /** 跳过数量。 */
+  skippedCount: number;
+
+  /** 异常样本数量。 */
+  badCount: number;
+}
+
+/**
+ * raw → feature 转换结果。
+ */
+export interface FeatureConvertResult {
+  /** raw dataset 根目录。 */
+  rawRoot: string;
+
+  /** feature 输出根目录。 */
+  featureRoot: string;
+
+  /** 扫描样本数量。 */
+  scannedCount: number;
+
+  /** 成功转换数量。 */
+  convertedCount: number;
+
+  /** 跳过数量。 */
+  skippedCount: number;
+
+  /** 失败数量。 */
+  failedCount: number;
+
+  /** 失败项。 */
+  failedItems?: Array<Record<string, unknown>>;
+
+  /** 结果说明。 */
+  message?: string;
+}

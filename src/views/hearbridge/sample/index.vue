@@ -98,6 +98,12 @@
           <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
           <el-button :loading="loading" @click="refreshAll">刷新统计</el-button>
+          <el-button type="success" :loading="syncLoading" @click="handleSyncSamples">
+            同步样本
+          </el-button>
+          <el-button type="warning" :loading="convertLoading" @click="handleConvertFeatures">
+            转换特征数据
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -245,6 +251,12 @@ const resourceLoading = ref(false);
 /** 质量标记提交状态。 */
 const qualitySubmitLoading = ref(false);
 
+/** 样本同步状态。 */
+const syncLoading = ref(false);
+
+/** 特征转换状态。 */
+const convertLoading = ref(false);
+
 /** 质量标记弹窗是否显示。 */
 const qualityDialogVisible = ref(false);
 
@@ -307,6 +319,74 @@ async function loadResourceOptions(): Promise<void> {
     console.error("加载资源选项失败：", error);
   } finally {
     resourceLoading.value = false;
+  }
+}
+
+/** 从 Python 服务同步 raw 样本。 */
+async function handleSyncSamples(): Promise<void> {
+  try {
+    await ElMessageBox.confirm(
+      "确定从 Python 服务同步 raw dataset 样本吗？同步后会刷新样本列表和统计数据。",
+      "同步确认",
+      {
+        type: "info",
+        confirmButtonText: "同步",
+        cancelButtonText: "取消",
+      }
+    );
+
+    syncLoading.value = true;
+
+    const result = await SignSampleAPI.sync();
+
+    ElMessage.success(
+      `同步完成：扫描 ${result.scannedCount} 条，新增 ${result.insertedCount} 条，更新 ${result.updatedCount} 条，跳过 ${result.skippedCount} 条，异常 ${result.badCount} 条`
+    );
+
+    await refreshAll();
+  } catch (error) {
+    if (error !== "cancel") {
+      console.error("同步样本失败：", error);
+    }
+  } finally {
+    syncLoading.value = false;
+  }
+}
+
+/** 执行 raw → feature 转换。 */
+async function handleConvertFeatures(): Promise<void> {
+  try {
+    await ElMessageBox.confirm(
+      "确定将 raw dataset 转换为模型训练用的 feature 数据吗？转换后会生成 data_processed_arm_pose_10fps 目录下的训练样本。",
+      "转换确认",
+      {
+        type: "warning",
+        confirmButtonText: "开始转换",
+        cancelButtonText: "取消",
+      }
+    );
+
+    convertLoading.value = true;
+
+    const result = await SignSampleAPI.convertFeatures();
+
+    if (result.failedCount > 0 || result.skippedCount > 0) {
+      ElMessage.warning(
+        `转换完成，但存在异常：扫描 ${result.scannedCount} 条，成功 ${result.convertedCount} 条，跳过 ${result.skippedCount} 条，失败 ${result.failedCount} 条`
+      );
+    } else {
+      ElMessage.success(
+        `转换完成：扫描 ${result.scannedCount} 条，成功转换 ${result.convertedCount} 条`
+      );
+    }
+
+    console.log("raw → feature 转换结果：", result);
+  } catch (error) {
+    if (error !== "cancel") {
+      console.error("转换特征数据失败：", error);
+    }
+  } finally {
+    convertLoading.value = false;
   }
 }
 

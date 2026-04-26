@@ -1,15 +1,18 @@
 import hearbridgeRequest from "./hearbridge-request";
 import type {
+  FeatureConvertResult,
+  SignSampleItem,
   SignSamplePageResult,
   SignSampleQualityUpdateParams,
   SignSampleQueryParams,
   SignSampleSummary,
-  SignSampleItem,
+  SignSampleSyncResult,
 } from "@/types/api";
 
 /** 手势样本接口基础路径。 */
 const SIGN_SAMPLE_BASE_URL = "/sign/samples";
 
+/** 手势样本 API。 */
 /** 手势样本 API。 */
 const SignSampleAPI = {
   /** 分页查询手势样本列表。 */
@@ -22,6 +25,18 @@ const SignSampleAPI = {
   /** 查询手势样本统计信息。 */
   summary() {
     return hearbridgeRequest.get<any, SignSampleSummary>(`${SIGN_SAMPLE_BASE_URL}/summary`);
+  },
+
+  /** 从 Python 服务同步 raw 样本摘要。 */
+  sync() {
+    return hearbridgeRequest.post<any, SignSampleSyncResult>(`${SIGN_SAMPLE_BASE_URL}/sync`);
+  },
+
+  /** 调用后端执行 raw → feature 转换。 */
+  convertFeatures() {
+    return hearbridgeRequest.post<any, FeatureConvertResult>(
+      `${SIGN_SAMPLE_BASE_URL}/convert-features`
+    );
   },
 
   /** 更新样本质量状态。 */
