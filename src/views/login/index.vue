@@ -18,28 +18,28 @@
       <section class="auth-feature">
         <div class="auth-feature__badge">
           <span class="auth-feature__dot" />
-          Enterprise Ready
+          HearBridge Admin
         </div>
-        <h1 class="auth-feature__title">企业级管理系统</h1>
+        <h1 class="auth-feature__title">听桥管理端</h1>
         <p class="auth-feature__subtitle">
-          提供安全、高效、可扩展的管理解决方案，助力企业数字化转型与业务增长。
+          面向听障交流与手语训练系统的后台管理平台，支持手势资源管理、样本管理、模型训练与模型版本发布。
         </p>
         <ul class="auth-feature__highlights">
           <li>
             <span>✓</span>
-            统一身份认证与权限管理
+            管理手势分类、手势资源与数字人资源
           </li>
           <li>
             <span>✓</span>
-            支持多租户模式与租户隔离
+            同步 raw 样本并生成模型训练特征数据
           </li>
           <li>
             <span>✓</span>
-            数据安全与操作审计
+            执行模型训练并登记模型版本
           </li>
           <li>
             <span>✓</span>
-            灵活扩展与高可用架构
+            发布模型版本并驱动 Python 识别服务生效
           </li>
         </ul>
       </section>
@@ -70,10 +70,7 @@
         </transition>
 
         <footer class="auth-panel__footer">
-          <el-text size="small">
-            Copyright © 2021 - 2025 youlai.tech
-            <a href="http://beian.miit.gov.cn/" target="_blank">皖ICP备00064962号</a>
-          </el-text>
+          <el-text size="small">Copyright © 2026 HearBridge</el-text>
         </footer>
       </section>
     </div>

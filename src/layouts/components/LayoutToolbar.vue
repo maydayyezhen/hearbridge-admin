@@ -37,13 +37,12 @@
     <div class="navbar-actions__item">
       <el-dropdown trigger="click">
         <div class="user-profile">
-          <div style="width: 28px; height: 28px; overflow: hidden; border-radius: 50%">
-            <img
-              :src="userStore.userInfo.avatar"
-              class="user-profile__avatar"
-              style="width: 100%; height: 100%; object-fit: cover; object-position: center"
-            />
+          <div class="user-profile__avatar-text">
+            {{ adminUser.nickname ? adminUser.nickname.slice(0, 1) : "管" }}
           </div>
+          <span class="user-profile__name">
+            {{ adminUser.nickname || adminUser.username }}
+          </span>
           <span class="user-profile__name">{{ userStore.userInfo.username }}</span>
         </div>
         <template #dropdown>
@@ -71,7 +70,10 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { defaults } from "@/settings";
 import { DeviceEnum, SidebarColor, ThemeMode, LayoutMode } from "@/enums/settings";
-import { useAppStore, useSettingsStore, useUserStore } from "@/store";
+import { useAppStore, useSettingsStore } from "@/store";
+import AdminAuthAPI from "@/api/hearbridge/admin-auth";
+import { clearAdminAuth, getAdminUser } from "@/utils/hearbridge-admin-auth";
+import type { AdminUserInfo } from "@/types/api";
 
 // 导入子组件
 import CommandPalette from "@/components/CommandPalette/index.vue";
@@ -85,8 +87,18 @@ import { useTenantStoreHook } from "@/store/modules/tenant";
 const { t } = useI18n();
 const appStore = useAppStore();
 const settingStore = useSettingsStore();
-const userStore = useUserStore();
 const tenantStore = useTenantStoreHook();
+
+/** 当前登录管理员信息。 */
+const adminUser = computed(() => {
+  return (
+    getAdminUser<AdminUserInfo>() || {
+      id: 0,
+      username: "admin",
+      nickname: "管理员",
+    }
+  );
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -94,7 +106,7 @@ const router = useRouter();
 // 是否为桌面设备
 const isDesktop = computed(() => appStore.device === DeviceEnum.DESKTOP);
 
-const canSwitchTenant = computed(() => userStore.userInfo?.canSwitchTenant === true);
+const canSwitchTenant = computed(() => false);
 
 // 是否显示租户选择
 const showTenantSwitcher = computed(() => {
@@ -120,7 +132,7 @@ function handleTenantChange(tenantId: number) {
  * 打开个人中心页面
  */
 function handleProfileClick() {
-  router.push({ name: "Profile" });
+  ElMessage.info(`当前管理员：${adminUser.value.nickname || adminUser.value.username}`);
 }
 
 // 根据主题和侧边栏配色方案选择样式类
@@ -153,15 +165,21 @@ const navbarActionsClass = computed(() => {
  * 退出登录
  */
 function logout() {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
-    confirmButtonText: "确定",
+  ElMessageBox.confirm("确定退出听桥管理端吗？", "提示", {
+    confirmButtonText: "退出",
     cancelButtonText: "取消",
     type: "warning",
     lockScroll: false,
-  }).then(() => {
-    userStore.logout().then(() => {
-      router.push(`/login?redirect=${route.fullPath}`);
-    });
+  }).then(async () => {
+    try {
+      await AdminAuthAPI.logout();
+    } catch (error) {
+      console.warn("[HearBridge Admin] logout request failed:", error);
+    } finally {
+      clearAdminAuth();
+      ElMessage.success("已退出登录");
+      await router.push(`/login?redirect=${route.fullPath}`);
+    }
   });
 }
 
@@ -245,6 +263,20 @@ function handleSettingsClick() {
       flex-shrink: 0;
       width: 28px;
       height: 28px;
+      border-radius: 50%;
+    }
+
+    &__avatar-text {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, #409eff, #67c23a);
       border-radius: 50%;
     }
 

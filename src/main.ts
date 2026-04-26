@@ -30,9 +30,6 @@ import VXETable from "vxe-table";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import { configureVxeTable } from "@/plugins/vxe-table";
 
-// ===== 路由守卫 =====
-import { setupPermissionGuard } from "@/router/guards/permission";
-
 // 创建 Vue 应用实例
 const app = createApp(App);
 
@@ -49,9 +46,6 @@ Object.entries(ElementPlusIcons).forEach(([name, comp]) => app.component(name, c
 configureVxeTable();
 app.use(VXETable);
 app.use(InstallCodeMirror);
-
-// 4️⃣ 路由守卫
-setupPermissionGuard();
 
 // 5️⃣ 挂载应用
 app.mount("#app");

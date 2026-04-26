@@ -13,3 +13,4 @@ export type {
   ModelTrainResult,
 } from "./sign-sample";
 export type { ModelVersionStatus, SignModelVersionItem } from "./model-version";
+export type { AdminLoginRequest, AdminLoginResult, AdminUserInfo } from "./admin-auth";

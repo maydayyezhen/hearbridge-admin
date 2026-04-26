@@ -1,8 +1,11 @@
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import { getAdminToken } from "@/utils/hearbridge-admin-auth";
 
+/**
+ * 后台基础布局组件。
+ */
 export const Layout = () => import("@/layouts/index.vue");
-
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -145,6 +148,37 @@ const router = createRouter({
   routes: constantRoutes,
   // 刷新时，滚动条位置还原
   scrollBehavior: () => ({ left: 0, top: 0 }),
+});
+
+/** 免登录路由白名单。 */
+const whiteList = ["/login"];
+
+/**
+ * 管理端路由守卫。
+ *
+ * 无 token 时跳转登录页。
+ */
+router.beforeEach((to) => {
+  const token = getAdminToken();
+
+  if (token) {
+    if (to.path === "/login") {
+      return "/hearbridge/categories";
+    }
+
+    return true;
+  }
+
+  if (whiteList.includes(to.path)) {
+    return true;
+  }
+
+  return {
+    path: "/login",
+    query: {
+      redirect: to.fullPath,
+    },
+  };
 });
 
 // 全局注册 router
