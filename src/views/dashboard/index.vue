@@ -1,665 +1,433 @@
 ﻿<template>
-  <div class="relative p-6">
-    <!-- github 角标 -->
-    <github-corner class="absolute top-0 right-0 z-1 border-0" />
-
-    <el-card shadow="never" class="mt-2">
-      <div class="flex flex-wrap">
-        <!-- 左侧问候语区域 -->
-        <div class="flex-1 flex items-start">
-          <div style="width: 80px; height: 80px; overflow: hidden; border-radius: 50%">
-            <img
-              :src="userStore.userInfo.avatar + '?imageView2/1/w/80/h/80'"
-              class="w80px h80px rounded-full"
-              style="width: 100%; height: 100%; object-fit: cover; object-position: center"
-            />
-          </div>
-          <div class="ml-5">
-            <p class="text-base font-semibold text-[--el-text-color-primary] leading-tight">
-              {{ greetings }}
-            </p>
-            <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
-          </div>
+  <div class="hearbridge-dashboard">
+    <el-card shadow="never" class="hero-card">
+      <div class="hero-content">
+        <div>
+          <div class="hero-badge">HearBridge Admin</div>
+          <h1 class="hero-title">听桥后台管理概览</h1>
+          <p class="hero-subtitle">
+            管理手势资源、样本数据、模型训练与模型发布，形成从手机端采集到 Python
+            识别服务生效的完整闭环。
+          </p>
         </div>
 
-        <!-- 右侧图标区域 - PC端-->
-        <div class="hidden sm:block">
-          <div class="flex items-end space-x-6">
-            <!-- 仓库 -->
-            <div>
-              <div class="font-bold color-#ff9a2e text-sm flex items-center">
-                <el-icon class="mr-2px"><Folder /></el-icon>
-                仓库
-              </div>
-              <div class="mt-3 whitespace-nowrap">
-                <el-link href="https://gitee.com/youlaiorg/vue3-element-admin" target="_blank">
-                  <div class="i-svg:gitee text-lg color-#F76560" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link href="https://github.com/youlaitech/vue3-element-admin" target="_blank">
-                  <div class="i-svg:github text-lg color-#4080FF" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link href="https://gitcode.com/youlai/vue3-element-admin" target="_blank">
-                  <div class="i-svg:gitcode text-lg color-#FF9A2E" />
-                </el-link>
-              </div>
-            </div>
-
-            <!-- 文档 -->
-            <div>
-              <div class="font-bold color-#4080ff text-sm flex items-center">
-                <el-icon class="mr-2px"><Document /></el-icon>
-                文档
-              </div>
-              <div class="mt-3 whitespace-nowrap">
-                <el-link href="https://juejin.cn/post/7228990409909108793" target="_blank">
-                  <div class="i-svg:juejin text-lg" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link
-                  href="https://youlai.blog.csdn.net/article/details/130191394"
-                  target="_blank"
-                >
-                  <div class="i-svg:csdn text-lg" />
-                </el-link>
-                <el-divider direction="vertical" />
-                <el-link href="https://www.cnblogs.com/haoxianrui/p/17331952.html" target="_blank">
-                  <div class="i-svg:cnblogs text-lg" />
-                </el-link>
-              </div>
-            </div>
-
-            <!-- 视频 -->
-            <div>
-              <div class="font-bold color-#f76560 text-sm flex items-center">
-                <el-icon class="mr-2px"><VideoCamera /></el-icon>
-                视频
-              </div>
-              <div class="mt-3 whitespace-nowrap">
-                <el-link href="https://www.bilibili.com/video/BV1eFUuYyEFj" target="_blank">
-                  <div class="i-svg:bilibili text-lg" />
-                </el-link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 移动端图标区域-->
-        <div class="w-full sm:hidden mt-3">
-          <div class="flex justify-end space-x-4 overflow-x-auto">
-            <!-- 仓库图标 -->
-            <el-link href="https://gitee.com/youlaiorg/vue3-element-admin" target="_blank">
-              <div class="i-svg:gitee text-lg color-#F76560" />
-            </el-link>
-            <el-link href="https://github.com/youlaitech/vue3-element-admin" target="_blank">
-              <div class="i-svg:github text-lg color-#4080FF" />
-            </el-link>
-            <el-link href="https://gitcode.com/youlai/vue3-element-admin" target="_blank">
-              <div class="i-svg:gitcode text-lg color-#FF9A2E" />
-            </el-link>
-
-            <!-- 文档图标 -->
-            <el-link href="https://juejin.cn/post/7228990409909108793" target="_blank">
-              <div class="i-svg:juejin text-lg" />
-            </el-link>
-            <el-link href="https://youlai.blog.csdn.net/article/details/130191394" target="_blank">
-              <div class="i-svg:csdn text-lg" />
-            </el-link>
-            <el-link href="https://www.cnblogs.com/haoxianrui/p/17331952.html" target="_blank">
-              <div class="i-svg:cnblogs text-lg" />
-            </el-link>
-
-            <!-- 视频图标 -->
-            <el-link href="https://www.bilibili.com/video/BV1eFUuYyEFj" target="_blank">
-              <div class="i-svg:bilibili text-lg" />
-            </el-link>
-          </div>
+        <div class="hero-actions">
+          <el-button type="primary" @click="router.push('/hearbridge/samples')">
+            进入样本管理
+          </el-button>
+          <el-button @click="refreshAll">刷新概览</el-button>
         </div>
       </div>
     </el-card>
 
-    <!-- 数据统计 -->
-    <el-row :gutter="10" class="mt-5">
-      <!-- 在线用户数量 -->
-      <el-col :span="8" :xs="24" class="mb-xs-3">
-        <el-card
-          shadow="never"
-          class="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-        >
-          <template #header>
-            <div class="flex-x-between">
-              <span class="text-xs font-medium text-[--el-text-color-secondary]">在线用户</span>
-              <div class="flex items-center gap-2">
-                <span
-                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs leading-5 rounded-full border select-none"
-                  :class="sseStatusClass"
-                >
-                  <el-icon class="text-sm">
-                    <Loading v-if="!isConnected && connectionState === 'CONNECTING'" />
-                    <CircleCheck v-else-if="isConnected" />
-                    <CircleClose v-else />
-                  </el-icon>
-                  <span class="text-[--el-text-color-secondary]">SSE</span>
-                  <span class="font-medium">{{ sseStatusText }}</span>
-                </span>
-              </div>
-            </div>
-          </template>
-
-          <div class="mt-2 flex-1 flex items-end">
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-semibold tracking-wide">{{ onlineUserCount }}</span>
-              <span class="text-xs text-[--el-text-color-secondary]">人</span>
-            </div>
-          </div>
-
-          <div class="mt-2 flex justify-between items-center">
-            <span class="text-sm text-gray">更新时间</span>
-            <span class="text-sm">{{ formattedTime }}</span>
-          </div>
+    <el-row :gutter="16" class="mt-4">
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="never" class="metric-card" @click="router.push('/hearbridge/categories')">
+          <div class="metric-label">手势分类</div>
+          <div class="metric-value">{{ categoryCount }}</div>
+          <div class="metric-desc">分类管理与封面维护</div>
         </el-card>
       </el-col>
 
-      <!-- 访客量UV) -->
-      <el-col :span="8" :xs="24" class="mb-xs-3">
-        <el-skeleton :loading="visitStatsLoading" :rows="5" animated>
-          <template #template>
-            <el-card>
-              <template #header>
-                <div>
-                  <el-skeleton-item variant="h3" style="width: 40%" />
-                  <el-skeleton-item variant="rect" style="float: right; width: 1em; height: 1em" />
-                </div>
-              </template>
-
-              <div class="flex-x-between">
-                <el-skeleton-item variant="text" style="width: 30%" />
-                <el-skeleton-item variant="circle" style="width: 2em; height: 2em" />
-              </div>
-              <div class="mt-5 flex-x-between">
-                <el-skeleton-item variant="text" style="width: 50%" />
-                <el-skeleton-item variant="text" style="width: 1em" />
-              </div>
-            </el-card>
-          </template>
-          <template v-if="!visitStatsLoading">
-            <el-card
-              shadow="never"
-              class="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <template #header>
-                <div class="flex-x-between">
-                  <span class="text-xs font-medium text-[--el-text-color-secondary]">
-                    访客数 UV
-                  </span>
-                  <el-tag type="success" size="small">日</el-tag>
-                </div>
-              </template>
-
-              <div class="mt-2 flex-1 flex items-end">
-                <div class="flex items-baseline gap-1.5">
-                  <span class="text-xl font-semibold tracking-wide">
-                    {{ displayTransitionUvCount }}
-                  </span>
-                  <span
-                    v-if="uvGrowthText !== null"
-                    :class="['text-xs', computeGrowthRateClass(visitStatsData.uvGrowthRate)]"
-                  >
-                    <el-icon
-                      v-if="
-                        visitStatsData.uvGrowthRate !== undefined &&
-                        visitStatsData.uvGrowthRate !== null
-                      "
-                    >
-                      <Top v-if="visitStatsData.uvGrowthRate > 0" />
-                      <Bottom v-else-if="visitStatsData.uvGrowthRate < 0" />
-                    </el-icon>
-                    {{ uvGrowthText }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="mt-2 flex justify-between items-center">
-                <span class="text-sm text-gray">总访客数</span>
-                <span class="text-sm">{{ displayTransitionTotalUvCount }}</span>
-              </div>
-            </el-card>
-          </template>
-        </el-skeleton>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="never" class="metric-card" @click="router.push('/hearbridge/resources')">
+          <div class="metric-label">手势资源</div>
+          <div class="metric-value">{{ resourceCount }}</div>
+          <div class="metric-desc">手势编码、图片、SiGML 资源</div>
+        </el-card>
       </el-col>
 
-      <!-- 浏览量(PV) -->
-      <el-col :span="8" :xs="24">
-        <el-skeleton :loading="visitStatsLoading" :rows="5" animated>
-          <template #template>
-            <el-card>
-              <template #header>
-                <div>
-                  <el-skeleton-item variant="h3" style="width: 40%" />
-                  <el-skeleton-item variant="rect" style="float: right; width: 1em; height: 1em" />
-                </div>
-              </template>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card shadow="never" class="metric-card" @click="router.push('/hearbridge/samples')">
+          <div class="metric-label">raw 样本</div>
+          <div class="metric-value">{{ sampleSummary.totalCount }}</div>
+          <div class="metric-desc">覆盖资源 {{ sampleSummary.resourceCount }} 个</div>
+        </el-card>
+      </el-col>
 
-              <div class="flex-x-between">
-                <el-skeleton-item variant="text" style="width: 30%" />
-                <el-skeleton-item variant="circle" style="width: 2em; height: 2em" />
-              </div>
-              <div class="mt-5 flex-x-between">
-                <el-skeleton-item variant="text" style="width: 50%" />
-                <el-skeleton-item variant="text" style="width: 1em" />
-              </div>
-            </el-card>
-          </template>
-          <template v-if="!visitStatsLoading">
-            <el-card
-              shadow="never"
-              class="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <template #header>
-                <div class="flex-x-between">
-                  <span class="text-xs font-medium text-[--el-text-color-secondary]">
-                    浏览量 PV
-                  </span>
-                  <el-tag type="primary" size="small">日</el-tag>
-                </div>
-              </template>
-
-              <div class="mt-2 flex-1 flex items-end">
-                <div class="flex items-baseline gap-1.5">
-                  <span class="text-xl font-semibold tracking-wide">
-                    {{ displayTransitionPvCount }}
-                  </span>
-                  <span
-                    v-if="pvGrowthText !== null"
-                    :class="['text-xs', computeGrowthRateClass(visitStatsData.pvGrowthRate)]"
-                  >
-                    <el-icon
-                      v-if="
-                        visitStatsData.pvGrowthRate !== undefined &&
-                        visitStatsData.pvGrowthRate !== null
-                      "
-                    >
-                      <Top v-if="visitStatsData.pvGrowthRate > 0" />
-                      <Bottom v-else-if="visitStatsData.pvGrowthRate < 0" />
-                    </el-icon>
-                    {{ pvGrowthText }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="mt-2 flex justify-between items-center">
-                <span class="text-sm text-gray">总浏览量</span>
-                <span class="text-sm">{{ displayTransitionTotalPvCount }}</span>
-              </div>
-            </el-card>
-          </template>
-        </el-skeleton>
+      <el-col :xs="24" :sm="12" :lg="6">
+        <el-card
+          shadow="never"
+          class="metric-card"
+          @click="router.push('/hearbridge/model-versions')"
+        >
+          <div class="metric-label">模型版本</div>
+          <div class="metric-value">{{ modelVersionCount }}</div>
+          <div class="metric-desc">当前发布：{{ publishedVersion?.versionName || "暂无" }}</div>
+        </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="10" class="mt-5">
-      <!-- 访问趋势统计图-->
-      <el-col :xs="24" :span="16">
-        <el-card>
+    <el-row :gutter="16" class="mt-4">
+      <el-col :xs="24" :lg="12">
+        <el-card shadow="never">
           <template #header>
-            <div class="flex-x-between">
-              <span>访问趋势</span>
-              <el-radio-group v-model="visitTrendDateRange" size="small">
-                <el-radio-button label="近7天" :value="7" />
-                <el-radio-button label="近30天" :value="30" />
-              </el-radio-group>
-            </div>
-          </template>
-          <ECharts :options="visitTrendChartOptions" height="400px" />
-        </el-card>
-      </el-col>
-      <!-- 最近访问 -->
-      <el-col :xs="24" :span="8">
-        <el-card>
-          <template #header>
-            <div class="flex-x-between">
-              <span class="font-semibold">最近访问</span>
-              <el-button
-                v-if="recentMenus.length > 0"
-                type="primary"
-                link
-                size="small"
-                @click="clearRecentMenus"
-              >
-                清空
+            <div class="card-header">
+              <span>样本质量概览</span>
+              <el-button type="primary" link @click="router.push('/hearbridge/samples')">
+                查看样本
               </el-button>
             </div>
           </template>
 
-          <div class="min-h-[400px] flex flex-col">
-            <!-- 宫格显示 -->
-            <div v-if="recentMenus.length > 0" class="grid grid-cols-2 gap-3">
-              <div
-                v-for="item in recentMenus"
-                :key="item.path"
-                class="group flex items-center gap-2 px-3 py-2.5 bg-[--el-fill-color-lighter] rounded-lg cursor-pointer transition-all duration-200 hover:bg-[--el-color-primary-light-8]"
-                @click="router.push(item.path)"
-              >
-                <!-- 图标 -->
-                <div class="shrink-0 w-8 h-8 flex items-center justify-center">
-                  <el-icon
-                    v-if="item.icon?.startsWith('el-icon-')"
-                    class="text-lg text-[--el-color-primary]"
-                  >
-                    <component :is="item.icon.replace('el-icon-', '')" />
-                  </el-icon>
-                  <div
-                    v-else-if="item.icon"
-                    :class="`i-svg:${item.icon} text-lg text-[--el-color-primary]`"
-                  />
-                  <el-icon v-else class="text-lg text-[--el-color-primary]"><Menu /></el-icon>
-                </div>
-                <!-- 标题 -->
-                <span class="text-sm truncate flex-1 leading-tight">
-                  {{ item.title }}
-                </span>
+          <el-row :gutter="12">
+            <el-col :span="6">
+              <div class="quality-item good">
+                <div class="quality-value">{{ sampleSummary.goodCount }}</div>
+                <div class="quality-label">良好</div>
               </div>
-            </div>
+            </el-col>
+            <el-col :span="6">
+              <div class="quality-item warning">
+                <div class="quality-value">{{ sampleSummary.warningCount }}</div>
+                <div class="quality-label">警告</div>
+              </div>
+            </el-col>
+            <el-col :span="6">
+              <div class="quality-item bad">
+                <div class="quality-value">{{ sampleSummary.badCount }}</div>
+                <div class="quality-label">异常</div>
+              </div>
+            </el-col>
+            <el-col :span="6">
+              <div class="quality-item unknown">
+                <div class="quality-value">{{ sampleSummary.unknownCount }}</div>
+                <div class="quality-label">未知</div>
+              </div>
+            </el-col>
+          </el-row>
 
-            <!-- 空状态 -->
-            <div v-else class="flex flex-col items-center justify-center flex-1 py-16">
-              <el-icon :size="48" class="text-[--el-text-color-placeholder] mb-4">
-                <Clock />
-              </el-icon>
-              <p class="text-sm text-[--el-text-color-secondary] mb-2">暂无访问记录</p>
-              <p class="text-xs text-[--el-text-color-placeholder]">访问的页面会自动记录在这里</p>
-            </div>
+          <el-divider />
+
+          <div class="pipeline">
+            <div class="pipeline-step done">raw 样本采集</div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step done">样本同步</div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step done">特征转换</div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step done">模型训练</div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step done">模型发布</div>
           </div>
         </el-card>
       </el-col>
+
+      <el-col :xs="24" :lg="12">
+        <el-card shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span>当前发布模型</span>
+              <el-button type="primary" link @click="router.push('/hearbridge/model-versions')">
+                管理版本
+              </el-button>
+            </div>
+          </template>
+
+          <el-empty v-if="!publishedVersion" description="暂无发布模型" />
+
+          <el-descriptions v-else :column="1" border>
+            <el-descriptions-item label="版本名称">
+              {{ publishedVersion.versionName }}
+            </el-descriptions-item>
+            <el-descriptions-item label="样本数">
+              {{ publishedVersion.sampleCount }}
+            </el-descriptions-item>
+            <el-descriptions-item label="类别数">
+              {{ publishedVersion.classCount }}
+            </el-descriptions-item>
+            <el-descriptions-item label="验证准确率">
+              <el-tag type="success">
+                {{ formatPercent(publishedVersion.finalValAccuracy) }}
+              </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="模型路径">
+              <span class="path-text">{{ publishedVersion.modelPath }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-card>
+      </el-col>
     </el-row>
+
+    <el-card shadow="never" class="mt-4">
+      <template #header>
+        <div class="card-header">
+          <span>快捷操作</span>
+          <span class="header-tip">按演示流程从左到右操作</span>
+        </div>
+      </template>
+
+      <div class="quick-actions">
+        <el-button type="primary" plain @click="router.push('/hearbridge/categories')">
+          手势分类管理
+        </el-button>
+        <el-button type="primary" plain @click="router.push('/hearbridge/resources')">
+          手势资源管理
+        </el-button>
+        <el-button type="success" plain @click="router.push('/hearbridge/samples')">
+          样本同步 / 特征转换
+        </el-button>
+        <el-button type="warning" plain @click="router.push('/hearbridge/training')">
+          模型训练
+        </el-button>
+        <el-button type="danger" plain @click="router.push('/hearbridge/model-versions')">
+          模型版本发布
+        </el-button>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-defineOptions({
-  name: "Dashboard",
-  inheritAttrs: false,
-});
+import SignCategoryAPI from "@/api/hearbridge/sign-category";
+import SignResourceAPI from "@/api/hearbridge/sign-resource";
+import SignSampleAPI from "@/api/hearbridge/sign-sample";
+import ModelVersionAPI from "@/api/hearbridge/model-version";
+import type { SignModelVersionItem, SignSampleSummary } from "@/types/api";
 
-import { dayjs } from "element-plus";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import StatisticsAPI from "@/api/system/statistics";
-import type { VisitStatsDetail, VisitTrendDetail } from "@/types/api";
-import { useUserStore } from "@/store/modules/user";
-import { formatGrowthRate } from "@/utils";
-import { useTransition, useDateFormat } from "@vueuse/core";
-import { CircleCheck, CircleClose, Loading, Clock, Menu } from "@element-plus/icons-vue";
-import { useOnlineCount, useRecentMenus } from "@/composables";
-
+/** 路由实例。 */
 const router = useRouter();
 
-// 在线用户数量组件相关
-const { onlineUserCount, lastUpdateTime, isConnected, connectionState } = useOnlineCount();
+/** 手势分类数量。 */
+const categoryCount = ref(0);
 
-// 最近访问菜单
-const { recentMenus, clearRecentMenus } = useRecentMenus();
+/** 手势资源数量。 */
+const resourceCount = ref(0);
 
-// 格式化时间戳
-const formattedTime = computed(() => {
-  if (!lastUpdateTime.value) return "--";
-  return useDateFormat(lastUpdateTime, "HH:mm:ss").value;
+/** 模型版本数量。 */
+const modelVersionCount = ref(0);
+
+/** 当前发布模型版本。 */
+const publishedVersion = ref<SignModelVersionItem | null>(null);
+
+/** 样本统计。 */
+const sampleSummary = reactive<SignSampleSummary>({
+  totalCount: 0,
+  resourceCount: 0,
+  goodCount: 0,
+  warningCount: 0,
+  badCount: 0,
+  unknownCount: 0,
 });
-
-const sseStatusText = computed(() => {
-  if (!isConnected.value) {
-    return connectionState.value === "CONNECTING" ? "连接中" : "未连接";
-  }
-  return "已连接";
-});
-
-const sseStatusClass = computed(() => {
-  if (isConnected.value)
-    return "text-[--el-color-success] bg-[--el-color-success-light-9] border-[--el-color-success-light-7]";
-  return connectionState.value === "CONNECTING"
-    ? "text-[--el-color-warning] bg-[--el-color-warning-light-9] border-[--el-color-warning-light-7]"
-    : "text-[--el-color-danger] bg-[--el-color-danger-light-9] border-[--el-color-danger-light-7]";
-});
-
-const userStore = useUserStore();
-
-// 当前时间（用于计算问候语）
-const currentDate = new Date();
-
-// 问候语：根据当前小时返回不同问候语
-const greetings = computed(() => {
-  const hours = currentDate.getHours();
-  const nickname = userStore.userInfo.nickname;
-  if (hours >= 6 && hours < 8) {
-    return "晨起披衣出草堂，轩窗已自喜微凉🌅！";
-  } else if (hours >= 8 && hours < 12) {
-    return `上午好，${nickname}！`;
-  } else if (hours >= 12 && hours < 18) {
-    return `下午好，${nickname}！`;
-  } else if (hours >= 18 && hours < 24) {
-    return `晚上好，${nickname}！`;
-  } else {
-    return "偷偷向银河要了一把碎星，只等你闭上眼睛撒入你的梦中，晚安🌛！";
-  }
-});
-
-// 访客统计数据加载状态
-const visitStatsLoading = ref(true);
-// 访客统计数据
-const visitStatsData = ref<VisitStatsDetail>({
-  todayUvCount: 0,
-  uvGrowthRate: 0,
-  totalUvCount: 0,
-  todayPvCount: 0,
-  pvGrowthRate: 0,
-  totalPvCount: 0,
-});
-
-const uvGrowthText = computed(() => {
-  if (
-    visitStatsData.value.uvGrowthRate === undefined ||
-    visitStatsData.value.uvGrowthRate === null
-  ) {
-    return "--";
-  }
-  return formatGrowthRate(visitStatsData.value.uvGrowthRate);
-});
-
-const pvGrowthText = computed(() => {
-  if (
-    visitStatsData.value.pvGrowthRate === undefined ||
-    visitStatsData.value.pvGrowthRate === null
-  ) {
-    return "--";
-  }
-  return formatGrowthRate(visitStatsData.value.pvGrowthRate);
-});
-
-// 数字过渡动画
-const transitionUvCount = useTransition(
-  computed(() => visitStatsData.value.todayUvCount),
-  {
-    duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0], // CSS cubic-bezier
-  }
-);
-
-const transitionTotalUvCount = useTransition(
-  computed(() => visitStatsData.value.totalUvCount),
-  {
-    duration: 1200,
-    transition: [0.25, 0.1, 0.25, 1.0],
-  }
-);
-
-const transitionPvCount = useTransition(
-  computed(() => visitStatsData.value.todayPvCount),
-  {
-    duration: 1000,
-    transition: [0.25, 0.1, 0.25, 1.0],
-  }
-);
-
-const transitionTotalPvCount = useTransition(
-  computed(() => visitStatsData.value.totalPvCount),
-  {
-    duration: 1200,
-    transition: [0.25, 0.1, 0.25, 1.0],
-  }
-);
-
-// 过渡结果可能是 Ref<number>，为模板中使用做类型和格式处理（避免 TS 报错）
-const displayTransitionUvCount = computed(() =>
-  Math.round(Number((transitionUvCount as any)?.value ?? transitionUvCount))
-);
-const displayTransitionTotalUvCount = computed(() =>
-  Math.round(Number((transitionTotalUvCount as any)?.value ?? transitionTotalUvCount))
-);
-const displayTransitionPvCount = computed(() =>
-  Math.round(Number((transitionPvCount as any)?.value ?? transitionPvCount))
-);
-const displayTransitionTotalPvCount = computed(() =>
-  Math.round(Number((transitionTotalPvCount as any)?.value ?? transitionTotalPvCount))
-);
-
-// 访问趋势日期范围（单位：天）
-const visitTrendDateRange = ref(7);
-// 访问趋势图表配置
-const visitTrendChartOptions = ref();
 
 /**
- * 获取访客统计数据
+ * 刷新全部概览数据。
  */
-const fetchVisitStatsData = () => {
-  StatisticsAPI.getVisitOverview()
-    .then((data) => {
-      visitStatsData.value = data;
-    })
-    .finally(() => {
-      visitStatsLoading.value = false;
-    });
-};
+async function refreshAll(): Promise<void> {
+  const [categories, resources, summary, versions, published] = await Promise.all([
+    SignCategoryAPI.list(),
+    SignResourceAPI.list(),
+    SignSampleAPI.summary(),
+    ModelVersionAPI.list(),
+    ModelVersionAPI.getPublished().catch(() => null),
+  ]);
+
+  categoryCount.value = categories.length;
+  resourceCount.value = resources.length;
+  modelVersionCount.value = versions.length;
+  publishedVersion.value = published;
+
+  sampleSummary.totalCount = summary.totalCount || 0;
+  sampleSummary.resourceCount = summary.resourceCount || 0;
+  sampleSummary.goodCount = summary.goodCount || 0;
+  sampleSummary.warningCount = summary.warningCount || 0;
+  sampleSummary.badCount = summary.badCount || 0;
+  sampleSummary.unknownCount = summary.unknownCount || 0;
+}
 
 /**
- * 获取访问趋势数据，并更新图表配置
- */
-const fetchVisitTrendData = () => {
-  const startDate = dayjs()
-    .subtract(visitTrendDateRange.value - 1, "day")
-    .toDate();
-  const endDate = new Date();
-
-  StatisticsAPI.getVisitTrend({
-    startDate: dayjs(startDate).format("YYYY-MM-DD"),
-    endDate: dayjs(endDate).format("YYYY-MM-DD"),
-  }).then((data) => {
-    updateVisitTrendChartOptions(data);
-  });
-};
-
-/**
- * 更新访问趋势图表的配置项
+ * 格式化百分比。
  *
- * @param data - 访问趋势数据
+ * @param value 小数形式准确率
+ * @returns 百分比文本
  */
-const updateVisitTrendChartOptions = (data: VisitTrendDetail) => {
-  visitTrendChartOptions.value = {
-    tooltip: {
-      trigger: "axis",
-    },
-    legend: {
-      data: ["浏览量(PV)", "访客量UV)"],
-      bottom: 0,
-    },
-    grid: {
-      left: "1%",
-      right: "5%",
-      bottom: "10%",
-      containLabel: true,
-    },
-    xAxis: {
-      type: "category",
-      data: data.dates,
-    },
-    yAxis: {
-      type: "value",
-      splitLine: {
-        show: true,
-        lineStyle: {
-          type: "dashed",
-        },
-      },
-    },
-    series: [
-      {
-        name: "浏览量(PV)",
-        type: "line",
-        data: data.pvList,
-        areaStyle: {
-          color: "rgba(64, 158, 255, 0.1)",
-        },
-        smooth: true,
-        itemStyle: {
-          color: "#4080FF",
-        },
-        lineStyle: {
-          color: "#4080FF",
-        },
-      },
-      {
-        name: "访客量UV)",
-        type: "line",
-        data: data.ipList,
-        areaStyle: {
-          color: "rgba(103, 194, 58, 0.1)",
-        },
-        smooth: true,
-        itemStyle: {
-          color: "#67C23A",
-        },
-        lineStyle: {
-          color: "#67C23A",
-        },
-      },
-    ],
-  };
-};
-
-/**
- * 根据增长率计算对应的 CSS 类名
- *
- * @param growthRate - 增长率数值
- */
-const computeGrowthRateClass = (growthRate?: number): string => {
-  if (!growthRate) {
-    return "text-[--el-color-info]";
+function formatPercent(value?: number): string {
+  if (value === undefined || value === null) {
+    return "-";
   }
-  if (growthRate > 0) {
-    return "text-[--el-color-danger]";
-  } else if (growthRate < 0) {
-    return "text-[--el-color-success]";
-  } else {
-    return "text-[--el-color-info]";
-  }
-};
 
-// 监听访问趋势日期范围的变化，重新获取趋势数据
-watch(
-  () => visitTrendDateRange.value,
-  () => {
-    fetchVisitTrendData();
-  },
-  { immediate: true }
-);
+  return `${(Number(value) * 100).toFixed(2)}%`;
+}
 
-// 组件挂载后加载访客统计数据和通知公告数据
+/** 页面挂载后加载概览数据。 */
 onMounted(() => {
-  fetchVisitStatsData();
+  refreshAll();
 });
 </script>
 
 <style lang="scss" scoped>
-// 暂无自定义样式
+.hearbridge-dashboard {
+  padding: 24px;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.hero-card {
+  background:
+    radial-gradient(circle at 0 0, rgba(64, 158, 255, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(64, 158, 255, 0.08), rgba(103, 194, 58, 0.08));
+}
+
+.hero-content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+  border-radius: 999px;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--el-text-color-primary);
+}
+
+.hero-subtitle {
+  max-width: 760px;
+  margin: 10px 0 0;
+  line-height: 1.7;
+  color: var(--el-text-color-secondary);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.metric-card {
+  height: 150px;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--el-box-shadow-light);
+    transform: translateY(-2px);
+  }
+}
+
+.metric-label {
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.metric-value {
+  margin-top: 18px;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--el-text-color-primary);
+}
+
+.metric-desc {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--el-text-color-placeholder);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+}
+
+.header-tip {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--el-text-color-secondary);
+}
+
+.quality-item {
+  padding: 18px 8px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.quality-value {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.quality-label {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.good {
+  color: var(--el-color-success);
+  background: var(--el-color-success-light-9);
+}
+
+.warning {
+  color: var(--el-color-warning);
+  background: var(--el-color-warning-light-9);
+}
+
+.bad {
+  color: var(--el-color-danger);
+  background: var(--el-color-danger-light-9);
+}
+
+.unknown {
+  color: var(--el-color-info);
+  background: var(--el-color-info-light-9);
+}
+
+.pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pipeline-step {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 999px;
+}
+
+.pipeline-step.done {
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+}
+
+.pipeline-arrow {
+  color: var(--el-text-color-placeholder);
+}
+
+.path-text {
+  word-break: break-all;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-actions {
+    flex-wrap: wrap;
+  }
+}
 </style>

@@ -134,7 +134,7 @@ async function handleLoginSubmit(): Promise<void> {
 
     ElMessage.success(`欢迎回来，${result.user.nickname || result.user.username}`);
 
-    const redirectPath = (route.query.redirect as string) || "/hearbridge/categories";
+    const redirectPath = (route.query.redirect as string) || "/dashboard";
     await router.push(decodeURIComponent(redirectPath));
   } finally {
     loading.value = false;

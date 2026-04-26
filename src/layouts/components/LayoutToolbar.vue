@@ -41,9 +41,7 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="handleProfileClick">
-              {{ t("navbar.profile") }}
-            </el-dropdown-item>
+            <el-dropdown-item @click="openPasswordDialog">修改密码</el-dropdown-item>
             <el-dropdown-item divided @click="logout">
               {{ t("navbar.logout") }}
             </el-dropdown-item>
@@ -56,6 +54,50 @@
     <div v-if="defaults.showSettings" class="navbar-actions__item" @click="handleSettingsClick">
       <div class="i-svg:setting" />
     </div>
+
+    <el-dialog v-model="passwordDialogVisible" title="修改管理员密码" width="420px" append-to-body>
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="90px"
+      >
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input
+            v-model.trim="passwordForm.oldPassword"
+            type="password"
+            show-password
+            placeholder="请输入原密码"
+          />
+        </el-form-item>
+
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input
+            v-model.trim="passwordForm.newPassword"
+            type="password"
+            show-password
+            placeholder="请输入新密码"
+          />
+        </el-form-item>
+
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
+            v-model.trim="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            placeholder="请再次输入新密码"
+            @keyup.enter="handleChangePassword"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="passwordSubmitting" @click="handleChangePassword">
+          确认修改
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -67,7 +109,8 @@ import { DeviceEnum, SidebarColor, ThemeMode, LayoutMode } from "@/enums/setting
 import { useAppStore, useSettingsStore } from "@/store";
 import AdminAuthAPI from "@/api/hearbridge/admin-auth";
 import { clearAdminAuth, getAdminUser } from "@/utils/hearbridge-admin-auth";
-import type { AdminUserInfo } from "@/types/api";
+import type { FormInstance, FormRules } from "element-plus";
+import type { AdminChangePasswordRequest, AdminUserInfo } from "@/types/api";
 
 // 导入子组件
 import CommandPalette from "@/components/CommandPalette/index.vue";
@@ -122,10 +165,42 @@ function handleTenantChange(tenantId: number) {
 }
 
 /**
- * 打开个人中心页面
+ * 打开修改密码弹窗。
  */
-function handleProfileClick() {
-  ElMessage.info(`当前管理员：${adminUser.value.nickname || adminUser.value.username}`);
+function openPasswordDialog(): void {
+  passwordForm.oldPassword = "";
+  passwordForm.newPassword = "";
+  passwordForm.confirmPassword = "";
+  passwordDialogVisible.value = true;
+}
+
+/**
+ * 提交修改密码。
+ */
+async function handleChangePassword(): Promise<void> {
+  const valid = await passwordFormRef.value?.validate().then(
+    () => true,
+    () => false
+  );
+
+  if (!valid) {
+    return;
+  }
+
+  passwordSubmitting.value = true;
+
+  try {
+    const result = await AdminAuthAPI.changePassword(passwordForm);
+
+    clearAdminAuth();
+    passwordDialogVisible.value = false;
+
+    ElMessage.success(result.message || "密码修改成功，请重新登录");
+
+    await router.push(`/login?redirect=${route.fullPath}`);
+  } finally {
+    passwordSubmitting.value = false;
+  }
 }
 
 // 根据主题和侧边栏配色方案选择样式类
@@ -175,6 +250,44 @@ function logout() {
     }
   });
 }
+
+/** 修改密码弹窗是否显示。 */
+const passwordDialogVisible = ref(false);
+
+/** 修改密码提交状态。 */
+const passwordSubmitting = ref(false);
+
+/** 修改密码表单引用。 */
+const passwordFormRef = ref<FormInstance>();
+
+/** 修改密码表单。 */
+const passwordForm = reactive<AdminChangePasswordRequest>({
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+
+/** 修改密码表单规则。 */
+const passwordRules: FormRules = {
+  oldPassword: [{ required: true, message: "请输入原密码", trigger: "blur" }],
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, message: "新密码长度不能少于 6 位", trigger: "blur" },
+  ],
+  confirmPassword: [
+    { required: true, message: "请再次输入新密码", trigger: "blur" },
+    {
+      validator: (_rule, value, callback) => {
+        if (value !== passwordForm.newPassword) {
+          callback(new Error("两次输入的新密码不一致"));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
+  ],
+};
 
 /**
  * 打开系统设置页面

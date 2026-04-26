@@ -33,3 +33,17 @@ export interface AdminLoginResult {
   /** 当前用户信息。 */
   user: AdminUserInfo;
 }
+
+/**
+ * 管理员修改密码请求。
+ */
+export interface AdminChangePasswordRequest {
+  /** 原密码。 */
+  oldPassword: string;
+
+  /** 新密码。 */
+  newPassword: string;
+
+  /** 确认新密码。 */
+  confirmPassword: string;
+}

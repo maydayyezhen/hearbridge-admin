@@ -31,7 +31,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/",
     name: "/",
     component: Layout,
-    redirect: "/hearbridge/categories",
+    redirect: "/dashboard",
     children: [
       {
         path: "dashboard",
@@ -81,7 +81,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/hearbridge",
     name: "HearBridge",
     component: Layout,
-    redirect: "/hearbridge/categories",
+    redirect: "/dashboard",
     meta: {
       title: "听桥管理",
       icon: "menu",
