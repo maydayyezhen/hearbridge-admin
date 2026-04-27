@@ -124,33 +124,76 @@
             </el-descriptions-item>
 
             <el-descriptions-item label="模型文件">
-              <ArtifactLink :url="currentVersion.modelUrl" :fallback="currentVersion.modelPath" />
+              <el-link v-if="currentVersion.modelUrl" :href="currentVersion.modelUrl" target="_blank" type="primary">
+                {{ currentVersion.modelUrl }}
+              </el-link>
+              <span v-else class="break-all text-gray-500">{{ currentVersion.modelPath || "-" }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item label="标签映射文件">
-              <ArtifactLink :url="currentVersion.labelMapUrl" :fallback="currentVersion.labelMapPath" />
+              <el-link
+                v-if="currentVersion.labelMapUrl"
+                :href="currentVersion.labelMapUrl"
+                target="_blank"
+                type="primary"
+              >
+                {{ currentVersion.labelMapUrl }}
+              </el-link>
+              <span v-else class="break-all text-gray-500">{{ currentVersion.labelMapPath || "-" }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item label="评估结果">
-              <ArtifactLink :url="currentVersion.evalResultUrl" :fallback="currentVersion.evalResultPath" />
+              <el-link
+                v-if="currentVersion.evalResultUrl"
+                :href="currentVersion.evalResultUrl"
+                target="_blank"
+                type="primary"
+              >
+                打开评估结果
+              </el-link>
+              <span v-else class="break-all text-gray-500">{{ currentVersion.evalResultPath || "-" }}</span>
             </el-descriptions-item>
           </el-descriptions>
         </el-tab-pane>
 
         <el-tab-pane label="训练曲线" name="curve">
-          <ArtifactImage
-            :url="currentVersion.trainingCurveUrl"
-            :fallback="currentVersion.trainingCurvePath"
-            empty-text="暂无训练曲线图"
-          />
+          <div v-if="currentVersion.trainingCurveUrl" class="space-y-3">
+            <el-image
+              :src="currentVersion.trainingCurveUrl"
+              fit="contain"
+              :preview-src-list="[currentVersion.trainingCurveUrl]"
+              class="w-full rounded border bg-gray-50"
+            />
+            <div class="break-all text-xs text-gray-500">
+              {{ currentVersion.trainingCurveUrl }}
+            </div>
+          </div>
+          <div v-else class="rounded border border-dashed p-6 text-center text-gray-500">
+            <div>暂无训练曲线图</div>
+            <div class="mt-2 break-all text-xs">
+              {{ currentVersion.trainingCurvePath || "未返回训练产物路径" }}
+            </div>
+          </div>
         </el-tab-pane>
 
         <el-tab-pane label="混淆矩阵" name="matrix">
-          <ArtifactImage
-            :url="currentVersion.confusionMatrixUrl"
-            :fallback="currentVersion.confusionMatrixPath"
-            empty-text="暂无混淆矩阵图"
-          />
+          <div v-if="currentVersion.confusionMatrixUrl" class="space-y-3">
+            <el-image
+              :src="currentVersion.confusionMatrixUrl"
+              fit="contain"
+              :preview-src-list="[currentVersion.confusionMatrixUrl]"
+              class="w-full rounded border bg-gray-50"
+            />
+            <div class="break-all text-xs text-gray-500">
+              {{ currentVersion.confusionMatrixUrl }}
+            </div>
+          </div>
+          <div v-else class="rounded border border-dashed p-6 text-center text-gray-500">
+            <div>暂无混淆矩阵图</div>
+            <div class="mt-2 break-all text-xs">
+              {{ currentVersion.confusionMatrixPath || "未返回训练产物路径" }}
+            </div>
+          </div>
         </el-tab-pane>
 
         <el-tab-pane label="标签映射" name="labelMap">
@@ -187,72 +230,6 @@ const publishedVersion = ref<SignModelVersionItem | null>(null);
 
 /** 当前查看详情的版本。 */
 const currentVersion = ref<SignModelVersionItem | null>(null);
-
-/** 训练产物链接组件。 */
-const ArtifactLink = defineComponent({
-  props: {
-    url: {
-      type: String,
-      default: "",
-    },
-    fallback: {
-      type: String,
-      default: "",
-    },
-  },
-  setup(props) {
-    return () =>
-      props.url
-        ? h(
-            ElLink,
-            {
-              href: props.url,
-              target: "_blank",
-              type: "primary",
-            },
-            { default: () => props.url }
-          )
-        : h("span", { class: "break-all text-gray-500" }, props.fallback || "-");
-  },
-});
-
-/** 训练产物图片组件。 */
-const ArtifactImage = defineComponent({
-  props: {
-    url: {
-      type: String,
-      default: "",
-    },
-    fallback: {
-      type: String,
-      default: "",
-    },
-    emptyText: {
-      type: String,
-      default: "暂无图片",
-    },
-  },
-  setup(props) {
-    return () => {
-      if (!props.url) {
-        return h("div", { class: "rounded border border-dashed p-6 text-center text-gray-500" }, [
-          h("div", props.emptyText),
-          h("div", { class: "mt-2 break-all text-xs" }, props.fallback || "未返回训练产物路径"),
-        ]);
-      }
-
-      return h("div", { class: "space-y-3" }, [
-        h(ElImage, {
-          src: props.url,
-          fit: "contain",
-          previewSrcList: [props.url],
-          class: "w-full rounded border bg-gray-50",
-        }),
-        h("div", { class: "break-all text-xs text-gray-500" }, props.url),
-      ]);
-    };
-  },
-});
 
 /** 加载模型版本列表。 */
 async function loadVersionList(): Promise<void> {
