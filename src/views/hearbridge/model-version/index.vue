@@ -197,9 +197,42 @@
         </el-tab-pane>
 
         <el-tab-pane label="标签映射" name="labelMap">
-          <pre class="rounded bg-gray-50 p-4 text-sm whitespace-pre-wrap break-all">{{
+          <el-table
+            v-if="parseLabelMapEntries(currentVersion.labelMapJson).length > 0"
+            :data="parseLabelMapEntries(currentVersion.labelMapJson)"
+            border
+            size="small"
+          >
+            <el-table-column prop="label" label="手势标签" min-width="180" show-overflow-tooltip />
+            <el-table-column prop="index" label="类别编号" width="120" align="center" />
+          </el-table>
+
+          <pre v-else class="rounded bg-gray-50 p-4 text-sm whitespace-pre-wrap break-all">{{
             formatLabelMapJson(currentVersion.labelMapJson)
           }}</pre>
+        </el-tab-pane>
+
+        <el-tab-pane label="评估结果" name="evalResult">
+          <div v-if="currentVersion.evalResultUrl" class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-500">评估结果文件预览</div>
+              <el-link :href="currentVersion.evalResultUrl" target="_blank" type="primary">
+                新窗口打开
+              </el-link>
+            </div>
+
+            <iframe
+              :src="currentVersion.evalResultUrl"
+              class="h-[520px] w-full rounded border bg-white"
+            />
+          </div>
+
+          <div v-else class="rounded border border-dashed p-6 text-center text-gray-500">
+            <div>暂无评估结果文件</div>
+            <div class="mt-2 break-all text-xs">
+              {{ currentVersion.evalResultPath || "未返回训练产物路径" }}
+            </div>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
@@ -212,6 +245,15 @@ import type {
   ModelVersionStatus,
   SignModelVersionItem,
 } from "@/types/api/hearbridge/model-version";
+
+/** 标签映射表格项。 */
+interface LabelMapEntry {
+  /** 手势标签。 */
+  label: string;
+
+  /** 类别编号。 */
+  index: number | string;
+}
 
 /** 页面加载状态。 */
 const loading = ref(false);
@@ -338,6 +380,28 @@ function formatLabelMapJson(value?: string): string {
     return JSON.stringify(JSON.parse(value), null, 2);
   } catch {
     return value;
+  }
+}
+
+/**
+ * 解析标签映射 JSON 为表格数据。
+ *
+ * @param value 标签映射 JSON 字符串
+ * @returns 标签映射表格项
+ */
+function parseLabelMapEntries(value?: string): LabelMapEntry[] {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Record<string, number | string>;
+
+    return Object.entries(parsed)
+      .map(([label, index]) => ({ label, index }))
+      .sort((a, b) => Number(a.index) - Number(b.index));
+  } catch {
+    return [];
   }
 }
 
