@@ -16,20 +16,35 @@ export interface SignModelVersionItem {
   /** Python 训练运行名称。 */
   runName: string;
 
-  /** 模型文件路径。 */
+  /** 模型文件路径或 MinIO objectKey。 */
   modelPath: string;
 
-  /** 标签映射文件路径。 */
+  /** 模型文件访问 URL。 */
+  modelUrl?: string;
+
+  /** 标签映射文件路径或 MinIO objectKey。 */
   labelMapPath: string;
 
-  /** 训练曲线图路径。 */
+  /** 标签映射文件访问 URL。 */
+  labelMapUrl?: string;
+
+  /** 训练曲线图路径或 MinIO objectKey。 */
   trainingCurvePath?: string;
 
-  /** 混淆矩阵图路径。 */
+  /** 训练曲线图访问 URL。 */
+  trainingCurveUrl?: string;
+
+  /** 混淆矩阵图路径或 MinIO objectKey。 */
   confusionMatrixPath?: string;
 
-  /** 评估结果文本路径。 */
+  /** 混淆矩阵图访问 URL。 */
+  confusionMatrixUrl?: string;
+
+  /** 评估结果文本路径或 MinIO objectKey。 */
   evalResultPath?: string;
+
+  /** 评估结果文本访问 URL。 */
+  evalResultUrl?: string;
 
   /** 样本总数。 */
   sampleCount: number;
