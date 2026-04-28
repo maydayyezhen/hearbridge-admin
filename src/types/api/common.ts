@@ -26,12 +26,33 @@ export interface BaseQueryParams {
   order?: string;
 }
 
-/** 分页数据结构（仅分页接口） */
+/** 分页数据结构（模板旧接口） */
 export interface PageResult<T> {
   /** 数据列表 */
   list: T[];
   /** 总记录数 */
   total: number;
+}
+
+/** 听桥后端通用分页响应。 */
+export interface HearBridgePageResult<T> {
+  /** 当前页数据。 */
+  records: T[];
+
+  /** 总记录数。 */
+  total: number;
+
+  /** 当前页码，从 1 开始。 */
+  pageNo: number;
+
+  /** 每页数量。 */
+  pageSize: number;
+
+  /** 总页数。 */
+  totalPages: number;
+
+  /** 是否还有下一页。 */
+  hasNext: boolean;
 }
 
 /** 下拉选项 */
