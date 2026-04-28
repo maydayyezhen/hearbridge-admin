@@ -11,7 +11,7 @@
           </div>
 
           <div class="flex gap-2">
-            <el-button :loading="loading" @click="loadCategoryList">刷新</el-button>
+            <el-button :loading="loading" @click="loadCategoryPage">刷新</el-button>
             <el-button type="primary" @click="openCreateDialog">新增分类</el-button>
           </div>
         </div>
@@ -52,6 +52,18 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="mt-4 flex justify-end">
+        <el-pagination
+          v-model:current-page="pageState.pageNo"
+          v-model:page-size="pageState.pageSize"
+          :total="pageState.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentPageChange"
+        />
+      </div>
     </el-card>
 
     <el-dialog
@@ -121,6 +133,18 @@ const formRef = ref<FormInstance>();
 /** 手势分类列表。 */
 const categoryList = ref<SignCategoryItem[]>([]);
 
+/** 分页状态。 */
+const pageState = reactive({
+  /** 当前页码。 */
+  pageNo: 1,
+
+  /** 每页数量。 */
+  pageSize: 20,
+
+  /** 总记录数。 */
+  total: 0,
+});
+
 /** 表单数据。 */
 const formModel = reactive<SignCategorySaveParams>({
   /** 分类编码。 */
@@ -146,17 +170,35 @@ const formRules = reactive<FormRules<SignCategorySaveParams>>({
   nameZh: [{ required: true, message: "请输入中文名称", trigger: "blur" }],
 });
 
-/** 加载手势分类列表。 */
-async function loadCategoryList(): Promise<void> {
+/** 加载手势分类分页。 */
+async function loadCategoryPage(): Promise<void> {
   loading.value = true;
 
   try {
-    categoryList.value = await SignCategoryAPI.list();
+    const page = await SignCategoryAPI.page({
+      pageNo: pageState.pageNo,
+      pageSize: pageState.pageSize,
+    });
+    categoryList.value = page.records;
+    pageState.total = page.total;
   } catch (error) {
-    console.error("加载手势分类列表失败：", error);
+    console.error("加载手势分类分页失败：", error);
   } finally {
     loading.value = false;
   }
+}
+
+/** 每页数量变化。 */
+function handlePageSizeChange(pageSize: number): void {
+  pageState.pageSize = pageSize;
+  pageState.pageNo = 1;
+  loadCategoryPage();
+}
+
+/** 当前页变化。 */
+function handleCurrentPageChange(pageNo: number): void {
+  pageState.pageNo = pageNo;
+  loadCategoryPage();
 }
 
 /** 重置表单。 */
@@ -206,6 +248,7 @@ async function handleSubmit(): Promise<void> {
     if (dialogMode.value === "create") {
       await SignCategoryAPI.create(payload);
       ElMessage.success("新增分类成功");
+      pageState.pageNo = 1;
     } else {
       if (editingId.value == null) {
         ElMessage.error("缺少分类 ID，无法更新");
@@ -217,7 +260,7 @@ async function handleSubmit(): Promise<void> {
     }
 
     dialogVisible.value = false;
-    await loadCategoryList();
+    await loadCategoryPage();
   } catch (error) {
     console.error("保存手势分类失败：", error);
   } finally {
@@ -236,7 +279,7 @@ async function handleDelete(row: SignCategoryItem): Promise<void> {
 
     await SignCategoryAPI.delete(row.id);
     ElMessage.success("删除分类成功");
-    await loadCategoryList();
+    await loadCategoryPage();
   } catch (error) {
     if (error !== "cancel") {
       console.error("删除手势分类失败：", error);
@@ -246,6 +289,6 @@ async function handleDelete(row: SignCategoryItem): Promise<void> {
 
 /** 组件挂载后自动加载数据。 */
 onMounted(() => {
-  loadCategoryList();
+  loadCategoryPage();
 });
 </script>
