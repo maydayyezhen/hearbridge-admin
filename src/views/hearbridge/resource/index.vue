@@ -34,7 +34,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="loadResourceList">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="handleQuery">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
@@ -94,6 +94,18 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="mt-4 flex justify-end">
+        <el-pagination
+          v-model:current-page="pageState.pageNo"
+          v-model:page-size="pageState.pageSize"
+          :total="pageState.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentPageChange"
+        />
+      </div>
     </el-card>
 
     <el-dialog
@@ -216,6 +228,18 @@ const queryForm = reactive({
   categoryCode: "",
 });
 
+/** 分页状态。 */
+const pageState = reactive({
+  /** 当前页码。 */
+  pageNo: 1,
+
+  /** 每页数量。 */
+  pageSize: 20,
+
+  /** 总记录数。 */
+  total: 0,
+});
+
 /** 手势分类选项。 */
 const categoryOptions = ref<SignCategoryItem[]>([]);
 
@@ -273,25 +297,49 @@ async function loadCategoryOptions(): Promise<void> {
   }
 }
 
-/** 加载手势资源列表。 */
-async function loadResourceList(): Promise<void> {
+/** 加载手势资源分页。 */
+async function loadResourcePage(): Promise<void> {
   loading.value = true;
 
   try {
-    resourceList.value = await SignResourceAPI.list({
+    const page = await SignResourceAPI.page({
       categoryCode: queryForm.categoryCode || undefined,
+      pageNo: pageState.pageNo,
+      pageSize: pageState.pageSize,
     });
+    resourceList.value = page.records;
+    pageState.total = page.total;
   } catch (error) {
-    console.error("加载手势资源列表失败：", error);
+    console.error("加载手势资源分页失败：", error);
   } finally {
     loading.value = false;
   }
 }
 
+/** 查询资源。 */
+function handleQuery(): void {
+  pageState.pageNo = 1;
+  loadResourcePage();
+}
+
+/** 每页数量变化。 */
+function handlePageSizeChange(pageSize: number): void {
+  pageState.pageSize = pageSize;
+  pageState.pageNo = 1;
+  loadResourcePage();
+}
+
+/** 当前页变化。 */
+function handleCurrentPageChange(pageNo: number): void {
+  pageState.pageNo = pageNo;
+  loadResourcePage();
+}
+
 /** 重置查询条件。 */
 function resetQuery(): void {
   queryForm.categoryCode = "";
-  loadResourceList();
+  pageState.pageNo = 1;
+  loadResourcePage();
 }
 
 /** 重置表单。 */
@@ -393,6 +441,7 @@ async function handleSubmit(): Promise<void> {
     if (dialogMode.value === "create") {
       await SignResourceAPI.create(payload);
       ElMessage.success("新增资源成功");
+      pageState.pageNo = 1;
     } else {
       if (editingId.value == null) {
         ElMessage.error("缺少资源 ID，无法更新");
@@ -404,7 +453,7 @@ async function handleSubmit(): Promise<void> {
     }
 
     dialogVisible.value = false;
-    await loadResourceList();
+    await loadResourcePage();
   } catch (error) {
     console.error("保存手势资源失败：", error);
   } finally {
@@ -423,7 +472,7 @@ async function handleDelete(row: SignResourceItem): Promise<void> {
 
     await SignResourceAPI.delete(row.id);
     ElMessage.success("删除资源成功");
-    await loadResourceList();
+    await loadResourcePage();
   } catch (error) {
     if (error !== "cancel") {
       console.error("删除手势资源失败：", error);
@@ -434,6 +483,6 @@ async function handleDelete(row: SignResourceItem): Promise<void> {
 /** 组件挂载后加载初始数据。 */
 onMounted(async () => {
   await loadCategoryOptions();
-  await loadResourceList();
+  await loadResourcePage();
 });
 </script>
