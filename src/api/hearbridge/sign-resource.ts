@@ -1,5 +1,5 @@
 import hearbridgeRequest from "./hearbridge-request";
-import type { SignResourceItem, SignResourceSaveParams } from "@/types/api";
+import type { HearBridgePageResult, SignResourceItem, SignResourceSaveParams } from "@/types/api";
 
 /** 手势资源接口基础路径。 */
 const SIGN_RESOURCE_BASE_URL = "/sign/resources";
@@ -10,6 +10,14 @@ export interface SignResourceQueryParams {
   categoryCode?: string;
 }
 
+/** 手势资源分页查询参数。 */
+export interface SignResourcePageParams extends SignResourceQueryParams {
+  /** 当前页码，从 1 开始。 */
+  pageNo: number;
+  /** 每页数量。 */
+  pageSize: number;
+}
+
 /** 手势资源 API。 */
 const SignResourceAPI = {
   /** 查询手势资源列表。 */
@@ -17,6 +25,14 @@ const SignResourceAPI = {
     return hearbridgeRequest.get<any, SignResourceItem[]>(SIGN_RESOURCE_BASE_URL, {
       params,
     });
+  },
+
+  /** 分页查询手势资源列表。 */
+  page(params: SignResourcePageParams) {
+    return hearbridgeRequest.get<any, HearBridgePageResult<SignResourceItem>>(
+      `${SIGN_RESOURCE_BASE_URL}/page`,
+      { params }
+    );
   },
 
   /** 根据资源编码查询资源详情。 */
